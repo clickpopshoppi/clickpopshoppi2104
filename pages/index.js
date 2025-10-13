@@ -1,78 +1,62 @@
-import Head from "next/head";
-import Script from "next/script";
-import { useEffect } from "react";
+import { Pi } from "@pi-network/pi-sdk";
+import { useState } from "react";
 
 export default function Home() {
-  useEffect(() => {
-    if (!window.Pi) return;
-    try {
-      window.Pi.init({
-        version: "2.0",
-        sandbox: true,
-        appId: "clickpopshoppi1719", // ✅ แก้ให้ตรงกับ App ID ใน Dev Portal
-        scopes: ["payments"],
-      });
-      console.log("✅ Pi SDK initialized successfully");
-    } catch (error) {
-      console.error("❌ Pi SDK initialization error:", error);
-    }
-  }, []);
+  const [message, setMessage] = useState("");
 
+  // ✅ เริ่มต้น Pi SDK
+  Pi.init({
+    version: "2.0",
+    sandbox: false,
+    appName: "Click Pop Shop Pi",
+    scopes: ["payments"],
+  });
+
+  // ✅ ฟังก์ชันทดสอบการชำระเงิน
   const handlePayment = async () => {
     try {
-      const payment = await window.Pi.createPayment({
+      const payment = await Pi.createPayment({
         amount: 0.01,
-        memo: "Test payment for ClickPopShopPi",
+        memo: "Test payment from Click Pop Shop Pi 💎",
         metadata: { type: "test" },
       });
-      alert("✅ Payment successful!");
+      setMessage("✅ Payment created successfully!");
       console.log(payment);
     } catch (error) {
-      alert("❌ Payment failed: " + error.message);
       console.error(error);
+      setMessage("❌ Payment failed: " + error.message);
     }
   };
 
   return (
-    <>
-      <Head>
-        <title>Click Pop Shop Pi</title>
-      </Head>
-
-      <Script
-        src="https://sdk.minepi.com/pi-sdk.js"
-        strategy="beforeInteractive"
-      />
-
-      <div
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        height: "100vh",
+        backgroundColor: "#f7f0ff",
+        fontFamily: "sans-serif",
+      }}
+    >
+      <h1>Click Pop Shop Pi 💜</h1>
+      <p>Test Pi Payment Integration</p>
+      <button
+        onClick={handlePayment}
         style={{
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "center",
-          alignItems: "center",
-          height: "100vh",
-          backgroundColor: "#faf5ff",
-          fontFamily: "Arial, sans-serif",
+          backgroundColor: "#703D92",
+          color: "white",
+          padding: "12px 30px",
+          borderRadius: "10px",
+          border: "none",
+          cursor: "pointer",
+          fontSize: "16px",
         }}
       >
-        <h1 style={{ color: "#6C2BD9" }}>🚀 Click Pop Shop Pi</h1>
-        <p style={{ color: "#333" }}>Connect and test Pi payment below</p>
-        <button
-          onClick={handlePayment}
-          style={{
-            backgroundColor: "#6C2BD9",
-            color: "#fff",
-            border: "none",
-            borderRadius: "8px",
-            padding: "12px 24px",
-            fontSize: "18px",
-            cursor: "pointer",
-            marginTop: "20px",
-          }}
-        >
-          Test Pi Payment 💎
-        </button>
-      </div>
-    </>
+        Test Pi Payment 💎
+      </button>
+      <p style={{ marginTop: "20px", color: "#333" }}>{message}</p>
+    </div>
   );
 }
