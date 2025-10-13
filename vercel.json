@@ -1,0 +1,9 @@
+{
+  "redirects": [
+    {
+      "source": "/validation-key.txt",
+      "destination": "https://clickpopshoppi.vercel.app/validation-key.txt",
+      "permanent": true
+    }
+  ]
+}
