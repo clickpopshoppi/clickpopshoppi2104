@@ -1,4 +1,5 @@
 import React from "react";
+import Script from "next/script";
 
 export default function Home() {
   const handleTestTransaction = async () => {
@@ -18,6 +19,10 @@ export default function Home() {
 
   return (
     <div style={{ textAlign: "center", marginTop: "50px" }}>
+      <Script
+        src="https://sdk.minepi.com/pi-sdk.js"
+        strategy="beforeInteractive"
+      />
       <h1>🚀 Click Pop Shop Pi</h1>
       <p>Test your Pi transaction below</p>
       <button
