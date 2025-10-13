@@ -1,9 +1,1 @@
-{
-  "redirects": [
-    {
-      "source": "/validation-key.txt",
-      "destination": "/validation-key.txt",
-      "permanent": true
-    }
-  ]
-}
+{}
