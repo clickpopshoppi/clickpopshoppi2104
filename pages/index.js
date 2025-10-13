@@ -1,34 +1,15 @@
-import { Pi } from "@pi-network/pi-sdk";
-
-Pi.init({
-  version: "2.0",
-  sandbox: true,
-  scopes: ["payments"],
-});
-
-async function testTransaction() {
-  try {
-    const user = await Pi.authenticate(["payments"], onIncompletePaymentFound);
-    const paymentData = {
-      amount: 0.01,
-      memo: "Click Pop Shop Pi test transaction 💎",
-      metadata: { productId: "test_001" },
-    };
-    const payment = await Pi.createPayment(paymentData);
-    await Pi.completePayment(payment.identifier);
-    alert("✅ Test Pi Transaction Success!");
-  } catch (error) {
-    alert("❌ Transaction Failed: " + error.message);
-  }
-}
-
-function onIncompletePaymentFound(payment) {
-  return Pi.completePayment(payment.identifier);
-}
-
-document.addEventListener("DOMContentLoaded", () => {
-  const button = document.getElementById("testTransactionButton");
-  if (button) {
-    button.addEventListener("click", testTransaction);
-  }
-});
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Click Pop Shop Pi</title>
+</head>
+<body style="font-family:sans-serif; text-align:center; margin-top:80px;">
+  <h1>🚀 Click Pop Shop Pi</h1>
+  <p>Test your Pi transaction below</p>
+  <button id="testTransactionButton" style="padding:12px 24px; background:#703D92; color:white; border:none; border-radius:8px; font-size:16px;">
+    Test Pi Transaction 💎
+  </button>
+  <script src="index.js"></script>
+</body>
+</html>
