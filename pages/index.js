@@ -1,58 +1,34 @@
-import React, { useEffect } from "react";
-import Script from "next/script";
+import { Pi } from "@pi-network/pi-sdk";
 
-export default function Home() {
-  useEffect(() => {
-    // Initialize Pi SDK
-    if (window.Pi) {
-      window.Pi.init({
-        version: "2.0",
-        sandbox: true,
-        // ✅ ต้องมี "payments" ใน scopes ด้วย
-        scopes: ["payments", "username", "wallet_address"],
-        onIncompletePaymentFound: (payment) => {
-          console.log("Incomplete payment:", payment);
-        },
-      });
-      console.log("✅ Pi SDK initialized successfully");
-    } else {
-      console.error("❌ Pi SDK not found");
-    }
-  }, []);
+Pi.init({
+  version: "2.0",
+  sandbox: true,
+  scopes: ["payments"],
+});
 
-  const handleTestTransaction = async () => {
-    try {
-      const payment = await window.Pi.createPayment({
-        amount: 0.001,
-        memo: "Test transaction from Click Pop Shop Pi",
-        metadata: { purpose: "test" },
-      });
-      console.log("Payment successful:", payment);
-      alert("✅ Transaction Success!");
-    } catch (error) {
-      console.error("Payment failed:", error);
-      alert("❌ Transaction Failed: " + error.message);
-    }
-  };
-
-  return (
-    <div style={{ textAlign: "center", marginTop: "60px" }}>
-      <Script src="https://sdk.minepi.com/pi-sdk.js"></Script>
-      <h1>🚀 Click Pop Shop Pi</h1>
-      <p>Test your Pi transaction below</p>
-      <button
-        onClick={handleTestTransaction}
-        style={{
-          background: "#703D92",
-          color: "white",
-          padding: "12px 24px",
-          borderRadius: "10px",
-          fontSize: "18px",
-          cursor: "pointer",
-        }}
-      >
-        Test Pi Transaction 💎
-      </button>
-    </div>
-  );
+async function testTransaction() {
+  try {
+    const user = await Pi.authenticate(["payments"], onIncompletePaymentFound);
+    const paymentData = {
+      amount: 0.01,
+      memo: "Click Pop Shop Pi test transaction 💎",
+      metadata: { productId: "test_001" },
+    };
+    const payment = await Pi.createPayment(paymentData);
+    await Pi.completePayment(payment.identifier);
+    alert("✅ Test Pi Transaction Success!");
+  } catch (error) {
+    alert("❌ Transaction Failed: " + error.message);
+  }
 }
+
+function onIncompletePaymentFound(payment) {
+  return Pi.completePayment(payment.identifier);
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  const button = document.getElementById("testTransactionButton");
+  if (button) {
+    button.addEventListener("click", testTransaction);
+  }
+});
