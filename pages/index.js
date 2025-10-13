@@ -1,70 +1,73 @@
-import { useEffect } from "react";
+import Head from "next/head";
 import Script from "next/script";
+import { useEffect } from "react";
 
 export default function Home() {
   useEffect(() => {
-    const initPi = () => {
-      if (!window.Pi) return;
-      try {
-        window.Pi.init({
-          version: "2.0",
-          sandbox: true, // testnet
-          appId: "clickpopshoppi1719", // your Pi App ID
-          scopes: ["payments"],
-        });
-        console.log("✅ Pi SDK initialized");
-      } catch (e) {
-        console.error("❌ Pi init error:", e);
-      }
-    };
-
-    if (typeof window !== "undefined") {
-      if (window.Pi) initPi();
-      else window.addEventListener("pi-sdk-ready", initPi);
-      return () => window.removeEventListener("pi-sdk-ready", initPi);
+    if (!window.Pi) return;
+    try {
+      window.Pi.init({
+        version: "2.0",
+        sandbox: true,
+        appId: "clickpopshoppi1719", // ✅ แก้ให้ตรงกับ App ID ใน Dev Portal
+        scopes: ["payments"],
+      });
+      console.log("✅ Pi SDK initialized successfully");
+    } catch (error) {
+      console.error("❌ Pi SDK initialization error:", error);
     }
   }, []);
 
-  const handleTestPayment = async () => {
+  const handlePayment = async () => {
     try {
       const payment = await window.Pi.createPayment({
         amount: 0.01,
-        memo: "Test Pi Transaction",
+        memo: "Test payment for ClickPopShopPi",
         metadata: { type: "test" },
       });
-      alert("✅ Payment initiated successfully!");
+      alert("✅ Payment successful!");
       console.log(payment);
     } catch (error) {
-      alert("❌ Transaction Failed: " + error.message);
+      alert("❌ Payment failed: " + error.message);
       console.error(error);
     }
   };
 
   return (
     <>
+      <Head>
+        <title>Click Pop Shop Pi</title>
+      </Head>
+
       <Script
         src="https://sdk.minepi.com/pi-sdk.js"
         strategy="beforeInteractive"
       />
+
       <div
         style={{
-          textAlign: "center",
-          marginTop: "100px",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "100vh",
+          backgroundColor: "#faf5ff",
           fontFamily: "Arial, sans-serif",
         }}
       >
         <h1 style={{ color: "#6C2BD9" }}>🚀 Click Pop Shop Pi</h1>
-        <p>Start testing your Pi transaction securely below</p>
+        <p style={{ color: "#333" }}>Connect and test Pi payment below</p>
         <button
-          onClick={handleTestPayment}
+          onClick={handlePayment}
           style={{
-            backgroundColor: "#6c2bd9",
-            color: "white",
-            padding: "12px 28px",
-            borderRadius: "10px",
+            backgroundColor: "#6C2BD9",
+            color: "#fff",
             border: "none",
+            borderRadius: "8px",
+            padding: "12px 24px",
             fontSize: "18px",
             cursor: "pointer",
+            marginTop: "20px",
           }}
         >
           Test Pi Payment 💎
