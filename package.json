@@ -11,7 +11,7 @@
     "next": "14.2.4",
     "react": "18.2.0",
     "react-dom": "18.2.0",
-    "@pi-network/pi-sdk": "https://github.com/pi-apps/pi-sdk.git"
+    "@pi-network/pi-sdk": "git+https://github.com/pi-apps/pi-sdk.git"
   },
   "engines": {
     "node": ">=18.0.0"
