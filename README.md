@@ -1,83 +1,90 @@
-# Click Pop Shop Pi
+# 💎 Click Pop Shop Pi
 
-**Official PiOS-Compliant Repository**  
-Developed for the **Pi Hackathon 2025** and built to demonstrate real-world Pi Network utility through AI-powered live commerce, multilingual translation, and 100% GCV transactions.
+### **Where Social Commerce Meets the Power of Pi Network**
 
----
-
-## 📌 Project Information
-
-- **App Name:** Click Pop Shop Pi  
-- **App ID:** `click-pop-shop-pi-6ddcd051bfe324a9`  
-- **Repository:** [https://github.com/clickpopshoppi2104](https://github.com/clickpopshoppi2104)  
-- **Live Preview (Vercel):** [https://clickpopshoppi2104.vercel.app](https://clickpopshoppi2104.vercel.app)  
-- **Pi Browser Link:** [https://sandbox.minepi.com/app/click-pop-shop-pi-6ddcd051bfe324a9](https://sandbox.minepi.com/app/click-pop-shop-pi-6ddcd051bfe324a9)  
-- **Version:** 1.0.0  
-- **Framework:** Next.js 14.2.4  
-- **License:** PiOS v2.0  
-- **Developer Team:** Click Pop Shop Pi Team  
-- **Organization:** รวมใจรัก Pi Network Thailand  
-- **Contact Email:** clickpopshoppi@gmail.com  
+Click Pop Shop Pi is an **official PiOS-compliant Next.js application** built for the 2025 Pi Hackathon.  
+This project redefines digital commerce by merging **AI-driven live shopping, multilingual communication, and Pi-based transactions (GCV 100%)** — all within the Pi Network ecosystem.
 
 ---
 
-## 🧩 Features
+## 📌 Project Overview
 
-- ✅ Pi SDK v2.0 Integration (Sandbox + Production Ready)  
-- 💰 100% GCV Payment System via Pi Network  
-- 📺 AI Live Shopping Experience  
-- 🌐 Multilingual Auto Translation  
-- 🛍️ Social Commerce with Review & Reward Mechanism  
-- 🔒 Secure Authentication with Pi SDK Exclusive Login  
+| Key | Details |
+|-----|----------|
+| **App Name** | Click Pop Shop Pi |
+| **App ID** | `click-pop-shop-pi-6ddcd051bfe324a9` |
+| **Live Site (Vercel)** | [https://clickpopshoppi2104.vercel.app](https://clickpopshoppi2104.vercel.app) |
+| **Pi Browser (Sandbox)** | [https://sandbox.minepi.com/app/click-pop-shop-pi-6ddcd051bfe324a9](https://sandbox.minepi.com/app/click-pop-shop-pi-6ddcd051bfe324a9) |
+| **GitHub Repository** | [https://github.com/clickpopshoppi2104](https://github.com/clickpopshoppi2104) |
+| **Framework** | Next.js 14.2.4 |
+| **Pi SDK** | v2.0 |
+| **License** | PiOS License v2.0 |
+| **Developer Team** | Click Pop Shop Pi Team |
+| **Organization** | รวมใจรัก Pi Network Thailand |
+| **Contact** | clickpopshoppi@gmail.com |
+
+---
+
+## 🧠 Vision
+
+> “To empower people to earn, trade, and connect through Pi — where social value becomes real economic value.”
+
+Click Pop Shop Pi envisions a **unified digital marketplace** where every user becomes a creator, merchant, or consumer —  
+and every interaction is powered by the global Pi Network.
+
+---
+
+## 🧩 Core Features
+
+| Category | Feature |
+|-----------|----------|
+| 💰 Payment | Pi SDK v2.0 Integrated — 100% GCV Transaction |
+| 🛍️ Commerce | Marketplace + Live Stream Selling |
+| 🤖 AI & Language | Real-time Auto Translation + AI Chat |
+| ⭐ Community | Review, Reward & Stake to Earn |
+| 🔒 Security | Pi SDK Authentication & Encrypted API |
+| 🧾 Compliance | Full PiOS + Sandbox Verified |
 
 ---
 
 ## ⚙️ Tech Stack
 
 | Layer | Technology |
-|-------|-------------|
+|--------|-------------|
 | Frontend | Next.js (React 18.2) |
-| Hosting | Vercel |
-| SDK | Pi Network SDK v2.0 |
+| Backend | Vercel Serverless Functions |
+| SDK | Pi Network SDK 2.0 |
 | Language | JavaScript (ES2023) |
-| Style | CSS-in-JS |
-| Environment | `.env.local` (auto managed by Vercel) |
-
----
-
-## 🧠 Project Purpose
-
-Click Pop Shop Pi aims to create the **first complete social commerce ecosystem** within the Pi Network —  
-connecting merchants, creators, and consumers into one seamless platform where **Pi = Real Value**.  
-
-The app is fully compliant with **PiOS Licensing** and **Core Team Sandbox Guidelines**, ensuring  
-safe, transparent, and scalable integration with the Pi Mainnet environment.
+| Environment | `.env.local` via Vercel |
+| Design | Clean UI / UX — Mobile First |
 
 ---
 
 ## 🪙 PiOS Compliance Statement
 
-This repository is **fully compliant with PiOS License v2.0**, meaning:
-1. The code is open for educational and non-commercial use.
-2. All Pi SDK and payment integrations follow official Core Team documentation.
-3. The project exclusively supports Pi payments (no fiat or crypto integrations).
+This project adheres fully to **PiOS License v2.0**, which ensures:
+1. Source code transparency under PiOS guidelines.  
+2. Exclusively Pi-based transactions (no fiat/crypto hybrid).  
+3. Educational and community-oriented purpose only.  
+4. Respect for all intellectual property within the Pi ecosystem.  
 
 ---
 
 ## 📄 License
 
-This project is licensed under the **PiOS License v2.0**.  
-See the `LICENSE` file for full terms of use.
+This repository is licensed under the **PiOS License v2.0**.  
+See the [`LICENSE`](./LICENSE) file for detailed terms.
 
 ---
 
 ## 🌍 Developed By
+
 **Click Pop Shop Pi Team**  
-_รวมใจรัก Pi Network Thailand_  
-🔗 GitHub: [@clickpopshoppi2104](https://github.com/clickpopshoppi2104)  
+_รวมใจรัก Pi Network Thailand_ 🇹🇭  
+💜 Hashtag: `#RuamJaiRakPiNetworkThailand`  
 📧 Email: clickpopshoppi@gmail.com  
-💜 Hashtag: `#RuamJaiRakPiNetworkThailand`
+🔗 GitHub: [@clickpopshoppi2104](https://github.com/clickpopshoppi2104)
 
 ---
 
-### ✨ “Built for the Future of Pi — Empowering the World, One Transaction at a Time.”
+### ✨ _“Built for the Future of Pi — Empowering the World, One Transaction at a Time.”_
