@@ -1,62 +1,93 @@
+import { useEffect, useState } from "react";
 import { Pi } from "@pi-network/pi-sdk";
-import { useState } from "react";
 
 export default function Home() {
   const [message, setMessage] = useState("");
 
-  // ✅ เริ่มต้น Pi SDK
-  Pi.init({
-    version: "2.0",
-    sandbox: false,
-    appName: "Click Pop Shop Pi",
-    scopes: ["payments"],
-  });
+  // Initialize Pi SDK once
+  useEffect(() => {
+    Pi.init({
+      version: "2.0",
+      sandbox: true, // MUST be true for Step 6/10
+      appName: "Click Pop Shop Pi",
+      channelName: "clickpopshoppi2104",
+      scopes: ["payments"],
+    });
+  }, []);
 
-  // ✅ ฟังก์ชันทดสอบการชำระเงิน
   const handlePayment = async () => {
     try {
       const payment = await Pi.createPayment({
         amount: 0.01,
-        memo: "Test payment from Click Pop Shop Pi 💎",
+        memo: "Test payment from Click Pop Shop Pi",
         metadata: { type: "test" },
+        callbacks: {
+          onReadyForServerApproval: async (paymentId) => {
+            await fetch(
+              `${process.env.NEXT_PUBLIC_API_BASE}/api/pi/approve?paymentId=${paymentId}`,
+              { method: "POST" }
+            );
+          },
+          onReadyForServerCompletion: async (paymentId, txid) => {
+            await fetch(
+              `${process.env.NEXT_PUBLIC_API_BASE}/api/pi/complete?paymentId=${paymentId}&txid=${txid}`,
+              { method: "POST" }
+            );
+          },
+          onCancel: (paymentId) => {
+            console.warn("Payment canceled:", paymentId);
+          },
+          onError: (error, paymentId) => {
+            console.error("Payment error:", error, paymentId);
+          },
+        },
       });
-      setMessage("✅ Payment created successfully!");
-      console.log(payment);
+
+      setMessage("Payment created successfully.");
+      console.log("Payment object:", payment);
     } catch (error) {
       console.error(error);
-      setMessage("❌ Payment failed: " + error.message);
+      setMessage("Payment failed: " + (error?.message || "Unknown error"));
     }
   };
 
   return (
     <div
       style={{
+        minHeight: "100vh",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
-        height: "100vh",
+        gap: 12,
         backgroundColor: "#f7f0ff",
         fontFamily: "sans-serif",
+        padding: 24,
+        textAlign: "center",
       }}
     >
-      <h1>Click Pop Shop Pi 💜</h1>
-      <p>Test Pi Payment Integration</p>
+      <div style={{ fontSize: 12, opacity: 0.8 }}>
+        ⚙️ Sandbox Mode Enabled (For verification)
+      </div>
+      <h1 style={{ margin: 0 }}>Click Pop Shop Pi</h1>
+      <p style={{ marginTop: 0 }}>Test Pi Payment Integration</p>
+
       <button
         onClick={handlePayment}
         style={{
           backgroundColor: "#703D92",
-          color: "white",
+          color: "#fff",
           padding: "12px 30px",
-          borderRadius: "10px",
+          borderRadius: 10,
           border: "none",
           cursor: "pointer",
-          fontSize: "16px",
+          fontSize: 16,
         }}
       >
-        Test Pi Payment 💎
+        Test Pi Payment
       </button>
-      <p style={{ marginTop: "20px", color: "#333" }}>{message}</p>
+
+      <p style={{ marginTop: 20, color: "#333" }}>{message}</p>
     </div>
   );
 }
