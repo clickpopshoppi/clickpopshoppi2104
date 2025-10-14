@@ -1,18 +1,24 @@
+"use client";
+
 import { useEffect, useState } from "react";
-import { Pi } from "@pi-network/pi-sdk";
+import * as Pi from "@pi-network/pi-sdk";
 
 export default function Home() {
   const [message, setMessage] = useState("");
 
-  // Initialize Pi SDK once
   useEffect(() => {
-    Pi.init({
-      version: "2.0",
-      sandbox: true, // MUST be true for Step 6/10
-      appName: "Click Pop Shop Pi",
-      channelName: "clickpopshoppi2104",
-      scopes: ["payments"],
-    });
+    try {
+      Pi.init({
+        version: "2.0",
+        sandbox: true, // set to false when moving to production
+        appName: "Click Pop Shop Pi",
+        channelName: "clickpopshoppi2104",
+        scopes: ["payments"],
+      });
+      console.log("✅ Pi SDK initialized successfully");
+    } catch (error) {
+      console.error("❌ Pi SDK initialization failed:", error);
+    }
   }, []);
 
   const handlePayment = async () => {
@@ -43,51 +49,62 @@ export default function Home() {
         },
       });
 
-      setMessage("Payment created successfully.");
+      setMessage("✅ Sandbox payment created successfully.");
       console.log("Payment object:", payment);
     } catch (error) {
-      console.error(error);
-      setMessage("Payment failed: " + (error?.message || "Unknown error"));
+      console.error("❌ Payment failed:", error);
+      setMessage("❌ Payment failed: " + (error?.message || "Unknown error"));
     }
   };
 
   return (
-    <div
+    <main
       style={{
         minHeight: "100vh",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
-        gap: 12,
         backgroundColor: "#f7f0ff",
-        fontFamily: "sans-serif",
-        padding: 24,
+        fontFamily: "Inter, Arial, sans-serif",
+        padding: "2rem",
         textAlign: "center",
       }}
     >
-      <div style={{ fontSize: 12, opacity: 0.8 }}>
-        ⚙️ Sandbox Mode Enabled (For verification)
+      <div style={{ fontSize: "0.8rem", opacity: 0.75, marginBottom: "0.5rem" }}>
+        ⚙️ Sandbox Mode Enabled (Verification)
       </div>
-      <h1 style={{ margin: 0 }}>Click Pop Shop Pi</h1>
-      <p style={{ marginTop: 0 }}>Test Pi Payment Integration</p>
+
+      <h1 style={{ margin: 0, color: "#703D92", fontSize: "2rem" }}>
+        Click Pop Shop Pi
+      </h1>
+
+      <p style={{ marginTop: "0.5rem", color: "#333" }}>
+        Test Pi Payment Integration
+      </p>
 
       <button
         onClick={handlePayment}
         style={{
           backgroundColor: "#703D92",
-          color: "#fff",
-          padding: "12px 30px",
-          borderRadius: 10,
+          color: "#ffffff",
+          padding: "12px 32px",
+          borderRadius: "10px",
           border: "none",
           cursor: "pointer",
-          fontSize: 16,
+          fontSize: "1rem",
+          marginTop: "1.5rem",
+          transition: "opacity 0.25s ease-in-out",
         }}
+        onMouseEnter={(e) => (e.currentTarget.style.opacity = 0.85)}
+        onMouseLeave={(e) => (e.currentTarget.style.opacity = 1)}
       >
-        Test Pi Payment
+        Test Pi Payment 💎
       </button>
 
-      <p style={{ marginTop: 20, color: "#333" }}>{message}</p>
-    </div>
+      <p style={{ marginTop: "1.5rem", color: "#111", fontSize: "0.95rem" }}>
+        {message}
+      </p>
+    </main>
   );
 }
