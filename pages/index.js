@@ -1,28 +1,36 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import * as Pi from "@pi-network/pi-sdk";
 
 export default function Home() {
   const [message, setMessage] = useState("");
 
+  // ✅ Initialize Pi SDK dynamically (ปลอดภัยสุดใน Vercel)
   useEffect(() => {
-    try {
-      Pi.init({
-        version: "2.0",
-        sandbox: true, // set to false when moving to production
-        appName: "Click Pop Shop Pi",
-        channelName: "clickpopshoppi2104",
-        scopes: ["payments"],
-      });
-      console.log("✅ Pi SDK initialized successfully");
-    } catch (error) {
-      console.error("❌ Pi SDK initialization failed:", error);
+    async function initPi() {
+      try {
+        const { Pi } = await import("@pi-network/pi-sdk");
+        Pi.init({
+          version: "2.0",
+          sandbox: true, // ✅ true สำหรับ Sandbox Test
+          appName: "Click Pop Shop Pi",
+          channelName: "clickpopshoppi2104",
+          scopes: ["payments"],
+        });
+        console.log("✅ Pi SDK initialized successfully.");
+      } catch (err) {
+        console.error("❌ Pi SDK initialization failed:", err);
+      }
     }
+
+    initPi();
   }, []);
 
+  // ✅ Payment function
   const handlePayment = async () => {
     try {
+      const { Pi } = await import("@pi-network/pi-sdk");
+
       const payment = await Pi.createPayment({
         amount: 0.01,
         memo: "Test payment from Click Pop Shop Pi",
@@ -41,70 +49,65 @@ export default function Home() {
             );
           },
           onCancel: (paymentId) => {
-            console.warn("Payment canceled:", paymentId);
+            console.warn("⚠️ Payment canceled:", paymentId);
           },
           onError: (error, paymentId) => {
-            console.error("Payment error:", error, paymentId);
+            console.error("❌ Payment error:", error, paymentId);
           },
         },
       });
 
-      setMessage("✅ Sandbox payment created successfully.");
+      setMessage("✅ Payment created successfully.");
       console.log("Payment object:", payment);
     } catch (error) {
       console.error("❌ Payment failed:", error);
-      setMessage("❌ Payment failed: " + (error?.message || "Unknown error"));
+      setMessage("Payment failed: " + (error?.message || "Unknown error"));
     }
   };
 
+  // ✅ UI Rendering
   return (
-    <main
+    <div
       style={{
         minHeight: "100vh",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
-        backgroundColor: "#f7f0ff",
-        fontFamily: "Inter, Arial, sans-serif",
-        padding: "2rem",
+        gap: "12px",
+        backgroundColor: "#F8F4FF",
+        fontFamily: "Inter, sans-serif",
+        padding: "24px",
         textAlign: "center",
       }}
     >
-      <div style={{ fontSize: "0.8rem", opacity: 0.75, marginBottom: "0.5rem" }}>
-        ⚙️ Sandbox Mode Enabled (Verification)
-      </div>
-
-      <h1 style={{ margin: 0, color: "#703D92", fontSize: "2rem" }}>
+      <h1 style={{ color: "#703D92", marginBottom: "8px" }}>
         Click Pop Shop Pi
       </h1>
-
-      <p style={{ marginTop: "0.5rem", color: "#333" }}>
-        Test Pi Payment Integration
+      <p style={{ marginTop: "0", color: "#444" }}>
+        Test Pi Payment Integration (Sandbox)
       </p>
 
       <button
         onClick={handlePayment}
         style={{
           backgroundColor: "#703D92",
-          color: "#ffffff",
-          padding: "12px 32px",
-          borderRadius: "10px",
+          color: "#fff",
+          padding: "12px 28px",
+          borderRadius: "8px",
           border: "none",
           cursor: "pointer",
-          fontSize: "1rem",
-          marginTop: "1.5rem",
-          transition: "opacity 0.25s ease-in-out",
+          fontSize: "16px",
+          fontWeight: "600",
         }}
-        onMouseEnter={(e) => (e.currentTarget.style.opacity = 0.85)}
-        onMouseLeave={(e) => (e.currentTarget.style.opacity = 1)}
       >
-        Test Pi Payment 💎
+        Test Pi Payment
       </button>
 
-      <p style={{ marginTop: "1.5rem", color: "#111", fontSize: "0.95rem" }}>
+      <p style={{ marginTop: "18px", color: "#333", fontSize: "14px" }}>
         {message}
       </p>
-    </main>
+    </div>
   );
 }
+        
