@@ -11,10 +11,10 @@
     "next": "14.2.4",
     "react": "18.2.0",
     "react-dom": "18.2.0",
-    "@pi-network/pi-sdk": "git+https://github.com/pi-apps/pi-sdk.git"
+    "@pi-apps/pi-sdk": "https://github.com/pi-apps/pi-sdk.git"
   },
   "engines": {
-    "node": ">=18.0.0"
+    "node": "18.x"
   },
   "license": "MIT",
   "repository": {
@@ -26,7 +26,9 @@
     "nextjs",
     "clickpopshoppi",
     "sandbox",
-    "hackathon"
+    "hackathon",
+    "vercel-deploy"
   ],
-  "author": "Click Pop Shop Pi Team"
+  "author": "Click Pop Shop Pi Team",
+  "description": "Click Pop Shop Pi – A social-commerce & live-shopping app built on Pi Network ecosystem. Developed for Pi Hackathon 2025 by #RuamJaiRakPiNetworkThailand"
 }
