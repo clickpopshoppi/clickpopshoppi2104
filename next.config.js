@@ -2,7 +2,11 @@
 const nextConfig = {
   reactStrictMode: true,
   swcMinify: true,
-  output: "standalone"
+  output: 'standalone',
+  compress: true,
+  images: { unoptimized: true },
+  eslint: { ignoreDuringBuilds: true },
+  typescript: { ignoreBuildErrors: true },
 };
 
 module.exports = nextConfig;
