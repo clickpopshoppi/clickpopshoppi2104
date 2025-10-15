@@ -45,8 +45,7 @@ export default function Home() {
     <div style={{ textAlign: "center", marginTop: "80px" }}>
       <h1>🎉 Click Pop Shop Pi</h1>
       <p>
-        Welcome to the Pi-powered shopping experience!
-        <br />
+        Welcome to the Pi-powered shopping experience!<br />
         #RuamJaiRakPiNetworkThailand 💜
       </p>
       <button
