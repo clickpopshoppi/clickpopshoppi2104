@@ -1,100 +1,122 @@
-// pages/index.js
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function Home() {
-  const [amount, setAmount] = useState("");
-  const [message, setMessage] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [pi, setPi] = useState(null);
+  const [username, setUsername] = useState("");
+  const [balance, setBalance] = useState(81.40); // demo balance
+  const [connected, setConnected] = useState(false);
 
-  // ดึงกุญแจจาก Environment (ที่เราใส่ใน Vercel)
-  const API_KEY = process.env.PI_API_KEY;
-
-  const handlePayment = async () => {
-    try {
-      if (!amount) {
-        setMessage("Please enter amount first.");
-        return;
+  // ✅ โหลด Pi SDK อัตโนมัติ
+  useEffect(() => {
+    const script = document.createElement("script");
+    script.src = "https://sdk.minepi.com/pi-sdk.js";
+    script.async = true;
+    script.onload = () => {
+      if (window.Pi) {
+        window.Pi.init({ version: "2.0" });
+        setPi(window.Pi);
+        console.log("✅ Pi SDK loaded");
+      } else {
+        console.log("⚠️ Pi SDK not found");
       }
-      setLoading(true);
-      setMessage("Connecting to Pi Wallet...");
+    };
+    document.body.appendChild(script);
+  }, []);
 
-      // เรียก Pi SDK จาก window (ทำงานใน Pi Browser)
-      const payment = await window.Pi.createPayment(
-        {
-          amount: parseFloat(amount),
-          memo: "Click Pop Shop Pi Purchase",
-          metadata: { orderId: Date.now().toString() },
-          to_address: "GCEUZO7JZ43VQJWF4YKPUBLHDVQVFNI7TSVG7KML3VTPOZ3VKD7LJDOM",
-        },
-        {
-          headers: { Authorization: `Key ${API_KEY}` },
-          onReadyForServerCompletion: (paymentId, txid) => {
-            setMessage(`✅ Transaction complete! TXID: ${txid}`);
-          },
-        }
-      );
-    } catch (err) {
-      console.error(err);
-      setMessage("❌ Payment failed or cancelled.");
-    } finally {
-      setLoading(false);
+  // ✅ เชื่อมต่อกระเป๋า
+  const handleConnect = async () => {
+    if (!pi) {
+      alert("Pi SDK not ready yet. Please refresh inside Pi Browser.");
+      return;
+    }
+    try {
+      const scopes = ["username", "payments"];
+      const authResult = await pi.authenticate(scopes, onIncompletePaymentFound);
+      console.log("✅ Auth Result:", authResult);
+      setUsername(authResult.user.username);
+      setConnected(true);
+      alert(`Wallet connected: ${authResult.user.username}`);
+    } catch (e) {
+      console.error(e);
     }
   };
 
+  // ✅ ฟังก์ชันชำระเงิน
+  const handlePayment = async () => {
+    if (!pi) {
+      alert("Pi SDK not loaded yet.");
+      return;
+    }
+    try {
+      const payment = await pi.createPayment({
+        amount: 1, // 💡 เปลี่ยนจำนวน Pi ที่ต้องการทดสอบ
+        memo: "Test payment from Click Pop Shop Pi",
+        metadata: { orderId: "1234" },
+        to_address: "GCEUZO7JZ43VQJWF4YKPUBLHDVQVFNI7TSVG7KML3VTPOZ3VKD7LJDOM",
+      },
+      {
+        onReadyForServerApproval: (paymentId) => {
+          console.log("Ready for server approval:", paymentId);
+        },
+        onReadyForServerCompletion: (paymentId, txid) => {
+          console.log("Ready for completion:", paymentId, txid);
+        },
+        onCancel: (paymentId) => {
+          console.log("Payment cancelled:", paymentId);
+        },
+        onError: (error, paymentId) => {
+          console.error("Payment error:", error, paymentId);
+        }
+      });
+      console.log("✅ Payment initiated:", payment);
+    } catch (err) {
+      console.error("❌ Payment failed:", err);
+    }
+  };
+
+  const onIncompletePaymentFound = (payment) => {
+    console.log("Found incomplete payment:", payment);
+  };
+
   return (
-    <main
-      style={{
-        fontFamily: "system-ui, sans-serif",
-        padding: "40px",
-        maxWidth: "480px",
-        margin: "0 auto",
-        textAlign: "center",
-      }}
-    >
-      <h1>💜 Click Pop Shop Pi</h1>
-      <p>Pay easily with your Pi Wallet.</p>
-      <p>Transaction fee: <b>0.01 Pi per payment</b></p>
+    <div style={{ textAlign: "center", padding: "50px" }}>
+      <h1>💎 Click Pop Shop Pi</h1>
+      <p>Welcome to the Pi-powered shopping experience!<br/>#RuamJaiRakPiNetworkThailand 💜</p>
 
-      <input
-        type="number"
-        step="0.01"
-        min="0"
-        placeholder="Enter amount"
-        value={amount}
-        onChange={(e) => setAmount(e.target.value)}
-        style={{
-          padding: "10px",
-          marginTop: "20px",
-          width: "100%",
-          fontSize: "16px",
-          borderRadius: "8px",
-          border: "1px solid #ccc",
-        }}
-      />
-
-      <button
-        onClick={handlePayment}
-        disabled={loading}
-        style={{
-          marginTop: "20px",
-          padding: "12px 24px",
-          background: "#703D92",
-          color: "#fff",
-          border: "none",
-          borderRadius: "8px",
-          cursor: "pointer",
-          fontSize: "16px",
-        }}
-      >
-        {loading ? "Processing..." : "Pay with Pi"}
-      </button>
-
-      <p style={{ marginTop: "20px", fontSize: "14px", color: "#555" }}>
-        Receiving wallet: <br />
-        <b>GCEUZO7JZ43VQJWF4YKPUBLHDVQVFNI7TSVG7KML3VTPOZ3VKD7LJDOM</b>
-      </p>
-
-      <p style={{ marginTop: "20px", color: "green" }}>{message}</p>
-    </main>
+      {!connected ? (
+        <button
+          style={{
+            backgroundColor: "#703D92",
+            color: "#fff",
+            border: "none",
+            padding: "10px 20px",
+            borderRadius: "10px",
+            fontSize: "18px",
+          }}
+          onClick={handleConnect}
+        >
+          🔗 Connect Pi Wallet
+        </button>
+      ) : (
+        <>
+          <h2>💰 Wallet Connected</h2>
+          <p>Username: {username}</p>
+          <p>Balance: {balance} Pi</p>
+          <button
+            style={{
+              backgroundColor: "#9C27B0",
+              color: "#fff",
+              border: "none",
+              padding: "10px 20px",
+              borderRadius: "10px",
+              fontSize: "18px",
+            }}
+            onClick={handlePayment}
+          >
+            ⚡ Pay with Pi
+          </button>
+        </>
+      )}
+    </div>
   );
-} 
+}
