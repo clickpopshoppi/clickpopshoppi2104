@@ -1,18 +1,45 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  swcMinify: true,
   eslint: {
-    ignoreDuringBuilds: true
+    ignoreDuringBuilds: true,
   },
   typescript: {
-    ignoreBuildErrors: true
+    ignoreBuildErrors: true,
   },
+  output: "standalone",
+  poweredByHeader: false,
+  compress: true,
   images: {
-    unoptimized: true
+    domains: ["pi-network.github.io", "github.com", "vercel.app"],
+    formats: ["image/avif", "image/webp"],
   },
-  env: {
-    NEXT_PUBLIC_API_BASE: process.env.NEXT_PUBLIC_API_BASE
-  }
+  async headers() {
+    return [
+      {
+        source: "/(.*)",
+        headers: [
+          {
+            key: "X-Frame-Options",
+            value: "SAMEORIGIN",
+          },
+          {
+            key: "Referrer-Policy",
+            value: "strict-origin-when-cross-origin",
+          },
+          {
+            key: "X-Content-Type-Options",
+            value: "nosniff",
+          },
+          {
+            key: "X-DNS-Prefetch-Control",
+            value: "on",
+          }
+        ],
+      },
+    ];
+  },
 };
 
 module.exports = nextConfig;
