@@ -6,8 +6,8 @@ export default function Home() {
   const [balance, setBalance] = useState(81.40);
   const [connected, setConnected] = useState(false);
 
+  // โหลด SDK ของ Pi
   useEffect(() => {
-    // Load Pi SDK dynamically
     const script = document.createElement("script");
     script.src = "https://sdk.minepi.com/pi-sdk.js";
     script.async = true;
@@ -15,70 +15,64 @@ export default function Home() {
       if (window.Pi) {
         window.Pi.init({ version: "2.0" });
         setPi(window.Pi);
-        console.log("✅ Pi SDK loaded successfully");
-      } else {
-        console.error("❌ Pi SDK not found");
+        console.log("✅ Pi SDK Loaded");
       }
     };
     document.body.appendChild(script);
   }, []);
 
-  // Connect to Pi Wallet
+  // เชื่อมต่อกระเป๋า
   const handleConnect = async () => {
-    if (!window.Pi) return alert("Please open this app inside Pi Browser.");
-
+    if (!pi) return alert("⚠️ กรุณาเปิดใน Pi Browser เท่านั้น!");
     try {
       const scopes = ["username", "payments"];
-      const auth = await window.Pi.authenticate(scopes, (user) => console.log(user));
+      const auth = await pi.authenticate(scopes, (payment) =>
+        console.log("Authorized:", payment)
+      );
       setUsername(auth.user.username);
       setConnected(true);
-      alert(`Wallet connected: ${auth.user.username}`);
+      alert(`✅ Wallet connected: ${auth.user.username}`);
     } catch (err) {
-      console.error("Auth error:", err);
-      alert("❌ Wallet connection failed. Please try again.");
+      console.error("❌ Auth error:", err);
+      alert("เชื่อมต่อกระเป๋าไม่สำเร็จ กรุณารีเฟรชหน้าและลองใหม่อีกครั้ง");
     }
   };
 
-  // Make a payment (0.01 Pi fee per transaction)
+  // ทำการชำระเงิน
   const handlePayment = async () => {
-    if (!window.Pi) return alert("Please open this app inside Pi Browser.");
-
+    if (!pi) return alert("⚠️ กรุณาเปิดใน Pi Browser เท่านั้น!");
     try {
       const paymentData = {
-        amount: 0.01, // transaction fee per payment
-        memo: "Test transaction from Click Pop Shop Pi",
-        metadata: { orderId: "CPSP001" },
+        amount: 0.01,
+        memo: "Test payment from Click Pop Shop Pi (ค่าธรรมเนียม 0.01 Pi)",
+        metadata: { orderId: "test001" },
         to_address: "GCEUZO7JZ43VQJWF4YKPUBLHDVQVFNI7TSVG7KML3VTPOZ3VKD7LJDOM",
       };
 
       const callbacks = {
         onReadyForServerApproval: (paymentId) =>
-          console.log("Ready for server approval:", paymentId),
-        onReadyForServerCompletion: (paymentId, txid) => {
-          console.log("Payment complete:", paymentId, txid);
-          alert("✅ Payment completed successfully!");
-        },
-        onCancel: (paymentId) => console.log("❌ Payment cancelled:", paymentId),
-        onError: (err) => {
-          console.error("Payment error:", err);
-          alert("⚠️ Payment failed. Please try again.");
-        },
+          console.log("Ready for approval:", paymentId),
+        onReadyForServerCompletion: (paymentId, txid) =>
+          console.log("Ready for completion:", paymentId, txid),
+        onCancel: (paymentId) => console.log("Payment cancelled:", paymentId),
+        onError: (err) => console.error("Payment error:", err),
       };
 
-      await window.Pi.createPayment(paymentData, callbacks);
+      const payment = await pi.createPayment(paymentData, callbacks);
+      console.log("✅ Payment initiated:", payment);
     } catch (err) {
-      console.error("Payment failed:", err);
+      console.error("❌ Payment failed:", err);
+      alert("เกิดข้อผิดพลาดในการชำระ กรุณาลองใหม่อีกครั้ง");
     }
   };
 
   return (
-    <div style={{
-      textAlign: "center",
-      padding: "50px",
-      fontFamily: "Arial, sans-serif"
-    }}>
+    <div style={{ textAlign: "center", padding: "40px" }}>
       <h1>💎 Click Pop Shop Pi</h1>
-      <p>Experience real Pi payments inside Pi Browser<br />#RuamJaiRakPiNetworkThailand 💜</p>
+      <p>
+        Welcome to the Pi-powered shopping experience!<br />
+        #RuamJaiRakPiNetworkThailand 💜
+      </p>
 
       {!connected ? (
         <button
@@ -86,10 +80,9 @@ export default function Home() {
             backgroundColor: "#703D92",
             color: "#fff",
             border: "none",
-            padding: "12px 24px",
+            padding: "12px 22px",
             borderRadius: "10px",
             fontSize: "18px",
-            cursor: "pointer"
           }}
           onClick={handleConnect}
         >
@@ -98,25 +91,21 @@ export default function Home() {
       ) : (
         <>
           <h2>💰 Wallet Connected</h2>
-          <p><strong>Username:</strong> {username}</p>
-          <p><strong>Balance:</strong> {balance} Pi</p>
+          <p>Username: {username}</p>
+          <p>Balance: {balance} Pi</p>
           <button
             style={{
               backgroundColor: "#9C27B0",
               color: "#fff",
               border: "none",
-              padding: "12px 24px",
+              padding: "12px 22px",
               borderRadius: "10px",
               fontSize: "18px",
-              cursor: "pointer"
             }}
             onClick={handlePayment}
           >
-            ⚡ Pay with Pi
+            ⚡ Pay with Pi (0.01 Fee)
           </button>
-          <p style={{ marginTop: "15px", color: "gray", fontSize: "14px" }}>
-            Transaction fee: 0.01 Pi per payment
-          </p>
         </>
       )}
     </div>
