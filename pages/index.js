@@ -1,288 +1,223 @@
-import { useState, useEffect } from "react";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
-import QRCode from "qrcode.react";
+import { useEffect, useState } from "react";
 
 export default function Home() {
-  const [piUser, setPiUser] = useState(null);
-  const [balance, setBalance] = useState(81.4);
-  const [stakeAmount, setStakeAmount] = useState(10);
-  const [transactions, setTransactions] = useState([]);
-  const [activeTab, setActiveTab] = useState("all");
-  const [showQR, setShowQR] = useState(false);
-  const [scanMode, setScanMode] = useState(false);
-  const walletAddress = "GBMRV...BQZY7";
+  const [user, setUser] = useState(null);
+  const [balance, setBalance] = useState(81.40);
+  const [loading, setLoading] = useState(false);
+  const [history, setHistory] = useState([]);
+  const [stake, setStake] = useState(0);
+
+  useEffect(() => {
+    const script = document.createElement("script");
+    script.src = "https://sdk.minepi.com/pi-sdk.js";
+    script.async = true;
+    script.onload = () => {
+      window.Pi.init({ version: "2.0" });
+      console.log("✅ Pi SDK Loaded");
+    };
+    document.body.appendChild(script);
+  }, []);
 
   const connectWallet = async () => {
     try {
-      const user = await window.Pi.authenticate(["payments"], onIncompletePaymentFound);
-      setPiUser(user);
-      alert(`Wallet connected: ${user.username}`);
+      const scopes = ["username", "payments"];
+      const auth = await window.Pi.authenticate(scopes, onIncompletePaymentFound);
+      alert(`✅ Wallet connected: ${auth.user?.username}`);
+      setUser(auth.user);
     } catch (err) {
-      alert("Please open in Pi Browser and try again.");
+      console.error("❌ Auth Error:", err);
+      alert("⚠️ Failed to connect wallet.");
     }
   };
 
-  useEffect(() => {
-    if (piUser) {
-      setTransactions([
-        { id: 1, type: "receive", amount: 0.25, date: "2025-09-10" },
-        { id: 2, type: "send", amount: 1.0, date: "2025-09-11" },
-        { id: 3, type: "stake", amount: 10.0, date: "2025-10-12" },
-        { id: 4, type: "receive", amount: 2.5, date: "2025-10-14" },
-      ]);
-    }
-  }, [piUser]);
+  const onIncompletePaymentFound = (payment) => {
+    console.log("⚠️ Incomplete payment found:", payment);
+  };
 
-  const handlePay = () => {
-    const amount = 1.0;
-    const fee = 0.01;
-    if (balance < amount + fee) return alert("Insufficient balance");
-    setBalance((p) => p - amount - fee);
-    const newTx = { id: Date.now(), type: "send", amount, fee, date: new Date().toISOString().slice(0, 10) };
-    setTransactions((p) => [newTx, ...p]);
-    alert(`Paid ${amount} Pi (fee ${fee})`);
+  const handlePayment = async () => {
+    try {
+      setLoading(true);
+      const amount = 0.01;
+      const date = new Date().toLocaleString();
+
+      const payment = await window.Pi.createPayment(
+        {
+          amount,
+          memo: "Click Pop Shop Pi Payment",
+          metadata: { orderId: Date.now().toString() },
+        },
+        {
+          onReadyForServerApproval: (paymentId) => {
+            console.log("🟢 Ready for approval:", paymentId);
+          },
+          onReadyForServerCompletion: (paymentId, txid) => {
+            console.log("✅ Payment completed:", paymentId, txid);
+            alert(`🎉 Payment Successful!\nPayment ID: ${paymentId}`);
+
+            setBalance((prev) => (prev - amount - 0.01).toFixed(2));
+
+            setHistory((prev) => [
+              {
+                type: "paid",
+                amount,
+                fee: 0.01,
+                date,
+                txid,
+              },
+              ...prev,
+            ]);
+          },
+          onCancel: () => {
+            alert("⚠️ Payment canceled.");
+          },
+          onError: (error) => {
+            console.error("❌ Payment error:", error);
+            alert("❌ Payment failed or canceled.");
+          },
+        }
+      );
+
+      console.log("✅ Payment Object:", payment);
+    } catch (err) {
+      console.error("❌ Payment Exception:", err);
+      alert("⚠️ Something went wrong.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleStake = () => {
-    const amount = 1.0;
-    const fee = 0.01;
-    if (balance < amount + fee) return alert("Insufficient balance");
-    setBalance((p) => p - amount - fee);
-    setStakeAmount((p) => p + amount);
-    const newTx = { id: Date.now(), type: "stake", amount, fee, date: new Date().toISOString().slice(0, 10) };
-    setTransactions((p) => [newTx, ...p]);
-    alert(`Staked ${amount} Pi (fee ${fee})`);
+    const date = new Date().toLocaleString();
+    setStake((prev) => prev + 5);
+    setHistory((prev) => [
+      { type: "stake", amount: 5, fee: 0, date },
+      ...prev,
+    ]);
+    alert("💎 Staked 5 Pi successfully!");
   };
 
-  const onIncompletePaymentFound = (p) => console.log("Incomplete:", p);
-
-  const contacts = [
-    { name: "Building Materials", address: "GA66J...FO3OA" },
-    { name: "Fish Sauce", address: "GBMRV...BQZY7" },
-    { name: "Coffee Shop", address: "GDRVC...NC7GI" },
-  ];
-
-  const filteredTx = activeTab === "all" ? transactions : transactions.filter((t) => t.type === activeTab);
-
-  // Generate bar chart data (monthly summary)
-  const monthlyData = [
-    { month: "Aug", receive: 0.5, send: 0.2, stake: 5 },
-    { month: "Sep", receive: 1.2, send: 0.5, stake: 7 },
-    { month: "Oct", receive: 2.8, send: 1.0, stake: 10 },
-  ];
-
   return (
-    <main style={{ textAlign: "center", padding: "20px", fontFamily: "Arial, sans-serif" }}>
-      <h1>💎 Click Pop Shop Pi Wallet</h1>
-      <p>#RuamJaiRakPiNetworkThailand 💜</p>
+    <div
+      style={{
+        fontFamily: "Poppins, sans-serif",
+        textAlign: "center",
+        padding: "60px 20px",
+      }}
+    >
+      <h1 style={{ fontSize: "32px", color: "#000" }}>💎 Click Pop Shop Pi</h1>
+      <p style={{ fontSize: "16px", color: "#444" }}>
+        Welcome to the Pi-powered shopping experience!
+        <br />
+        #RuamJaiRakPiNetworkThailand 💜
+      </p>
 
-      {!piUser ? (
+      {!user ? (
         <button
           onClick={connectWallet}
           style={{
-            backgroundColor: "#703D92",
+            backgroundColor: "#7c3aed",
             color: "#fff",
-            padding: "12px 28px",
-            borderRadius: "10px",
+            padding: "14px 26px",
             border: "none",
+            borderRadius: "10px",
             fontSize: "16px",
-            marginTop: "20px",
+            cursor: "pointer",
+            marginTop: "30px",
           }}
         >
           🔗 Connect Pi Wallet
         </button>
       ) : (
         <>
-          {/* Balance Overview */}
-          <div style={{ background: "#f7f7f7", borderRadius: "12px", padding: "20px", marginTop: "20px" }}>
-            <h2>Balance: {balance.toFixed(2)} Pi</h2>
-            <p>Stake: {stakeAmount.toFixed(2)} Pi</p>
-          </div>
+          <div style={{ marginTop: "40px" }}>
+            <h2>💰 Wallet Connected</h2>
+            <p>
+              Username: <b>{user.username}</b>
+              <br />
+              Balance: <b>{balance} Pi</b>
+            </p>
 
-          {/* Chart Section */}
-          <div
-            style={{
-              marginTop: "30px",
-              background: "#fff",
-              borderRadius: "12px",
-              padding: "20px",
-              boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
-            }}
-          >
-            <h3>📊 Monthly Transaction Overview</h3>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={monthlyData} margin={{ top: 20, right: 20, left: 0, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="month" />
-                <YAxis />
-                <Tooltip />
-                <Legend />
-                <Bar dataKey="receive" fill="#24A148" name="Receive" />
-                <Bar dataKey="send" fill="#D92D20" name="Send" />
-                <Bar dataKey="stake" fill="#703D92" name="Stake" />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-
-          {/* Actions */}
-          <div style={{ marginTop: "25px" }}>
             <button
-              onClick={handlePay}
+              onClick={handlePayment}
+              disabled={loading}
               style={{
-                backgroundColor: "#6E44FF",
+                backgroundColor: loading ? "#aaa" : "#8b5cf6",
                 color: "#fff",
-                padding: "12px 28px",
-                borderRadius: "10px",
+                padding: "14px 30px",
                 border: "none",
-                fontSize: "16px",
-                margin: "8px",
+                borderRadius: "10px",
+                fontSize: "18px",
+                cursor: loading ? "not-allowed" : "pointer",
+                marginTop: "20px",
               }}
             >
-              ⚡ Pay
+              ⚡ {loading ? "Processing..." : "Pay 0.01 Pi"}
             </button>
+
             <button
               onClick={handleStake}
               style={{
-                backgroundColor: "#24A148",
+                backgroundColor: "#22c55e",
                 color: "#fff",
-                padding: "12px 28px",
-                borderRadius: "10px",
+                padding: "14px 30px",
                 border: "none",
-                fontSize: "16px",
-                margin: "8px",
+                borderRadius: "10px",
+                fontSize: "18px",
+                cursor: "pointer",
+                marginTop: "20px",
+                marginLeft: "10px",
               }}
             >
-              🔒 Stake
+              💎 Stake 5 Pi
             </button>
           </div>
 
-          {/* QR */}
-          <div style={{ marginTop: "25px" }}>
-            <button
-              onClick={() => setShowQR(!showQR)}
-              style={{
-                backgroundColor: "#FFD700",
-                color: "#000",
-                padding: "10px 24px",
-                borderRadius: "10px",
-                border: "none",
-                fontSize: "16px",
-                marginRight: "8px",
-              }}
-            >
-              📲 Show QR
-            </button>
-            <button
-              onClick={() => setScanMode(!scanMode)}
-              style={{
-                backgroundColor: "#FF8C00",
-                color: "#fff",
-                padding: "10px 24px",
-                borderRadius: "10px",
-                border: "none",
-                fontSize: "16px",
-              }}
-            >
-              🔍 Scan QR
-            </button>
-          </div>
-
-          {showQR && (
-            <div
-              style={{
-                marginTop: "15px",
-                background: "#fff",
-                borderRadius: "10px",
-                padding: "10px",
-                display: "inline-block",
-              }}
-            >
-              <QRCode value={walletAddress} size={150} />
-              <p style={{ fontSize: "12px", marginTop: "5px" }}>{walletAddress}</p>
-            </div>
-          )}
-
-          {/* Contacts */}
-          <div
-            style={{
-              marginTop: "20px",
-              background: "#fff5e6",
-              borderRadius: "10px",
-              padding: "20px",
-              textAlign: "left",
-            }}
-          >
-            <h3>👥 Contacts</h3>
-            <ul style={{ listStyle: "none", padding: 0 }}>
-              {contacts.map((c, i) => (
-                <li
-                  key={i}
-                  style={{
-                    borderBottom: "1px solid #eee",
-                    padding: "8px 0",
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                  }}
-                >
-                  <div>
-                    <strong>{c.name}</strong>
-                    <br />
-                    <small>{c.address}</small>
-                  </div>
-                  <div>
-                    <button
+          <div style={{ marginTop: "50px" }}>
+            <h3>📜 Transaction History</h3>
+            {history.length === 0 ? (
+              <p style={{ color: "#777" }}>No transactions yet.</p>
+            ) : (
+              <table
+                style={{
+                  width: "100%",
+                  maxWidth: "500px",
+                  margin: "20px auto",
+                  borderCollapse: "collapse",
+                }}
+              >
+                <thead>
+                  <tr style={{ borderBottom: "2px solid #ccc" }}>
+                    <th align="left">Date</th>
+                    <th>Type</th>
+                    <th>Amount</th>
+                    <th>Fee</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {history.map((tx, idx) => (
+                    <tr
+                      key={idx}
                       style={{
-                        background: "#6E44FF",
-                        color: "#fff",
-                        border: "none",
-                        borderRadius: "6px",
-                        padding: "4px 10px",
-                        marginRight: "4px",
+                        color:
+                          tx.type === "paid"
+                            ? "#ef4444"
+                            : tx.type === "stake"
+                            ? "#22c55e"
+                            : "#16a34a",
                       }}
                     >
-                      ↗ Send
-                    </button>
-                    <button
-                      style={{
-                        background: "#24A148",
-                        color: "#fff",
-                        border: "none",
-                        borderRadius: "6px",
-                        padding: "4px 10px",
-                      }}
-                    >
-                      ↙ Receive
-                    </button>
-                  </div>
-                </li>
-              ))}
-            </ul>
+                      <td align="left">{tx.date}</td>
+                      <td>{tx.type}</td>
+                      <td>{tx.amount}</td>
+                      <td>{tx.fee}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
           </div>
-
-          {/* Footer */}
-          <footer
-            style={{
-              position: "fixed",
-              bottom: 0,
-              left: 0,
-              width: "100%",
-              background: "#703D92",
-              display: "flex",
-              justifyContent: "space-around",
-              color: "#fff",
-              padding: "10px 0",
-              borderTopLeftRadius: "10px",
-              borderTopRightRadius: "10px",
-            }}
-          >
-            <span>🏠 Home</span>
-            <span>💸 Pay/Request</span>
-            <span>💰 Tokens</span>
-            <span>👥 Contacts</span>
-          </footer>
         </>
       )}
-    </main>
+    </div>
   );
 }
