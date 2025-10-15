@@ -2,11 +2,15 @@
 const nextConfig = {
   reactStrictMode: true,
   swcMinify: true,
-  output: 'standalone',
+  output: "export",
+  poweredByHeader: false,
   compress: true,
-  images: { unoptimized: true },
   eslint: { ignoreDuringBuilds: true },
   typescript: { ignoreBuildErrors: true },
+  images: {
+    domains: ["pi-network.github.io", "github.com", "vercel.app"],
+    formats: ["image/avif", "image/webp"],
+  },
 };
 
 module.exports = nextConfig;
