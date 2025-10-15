@@ -1,19 +1,9 @@
-{
-  "name": "clickpopshoppi2104",
-  "version": "1.0.0",
-  "private": true,
-  "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start"
-  },
-  "dependencies": {
-    "@pi-network/pi-sdk": "https://github.com/pi-apps/pi-sdk.git",
-    "next": "14.2.4",
-    "react": "18.2.0",
-    "react-dom": "18.2.0"
-  },
-  "engines": {
-    "node": "18.x"
-  }
+export default function Home() {
+  return (
+    <main style={{ padding: "40px", fontFamily: "sans-serif" }}>
+      <h1>🎉 Click Pop Shop Pi</h1>
+      <p>Deployed successfully on Vercel!</p>
+      <p>Now we are ready to integrate Pi SDK next step 🚀</p>
+    </main>
+  );
 }
