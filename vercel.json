@@ -1,8 +1,7 @@
 {
-  "buildCommand": "next build",
-  "outputDirectory": "out",
   "framework": "nextjs",
-  "ignoreCommand": "next telemetry disable",
   "installCommand": "npm install",
+  "buildCommand": "npm run build",
+  "outputDirectory": "out",
   "cleanUrls": true
 }
