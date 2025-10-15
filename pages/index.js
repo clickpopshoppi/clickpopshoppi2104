@@ -1,38 +1,53 @@
-import { useEffect } from "react";
+import { useState } from "react";
 
 export default function Home() {
-  const connectWallet = async () => {
+  const [user, setUser] = useState(null);
+
+  const handleConnect = async () => {
+    if (!window.Pi) {
+      alert("Pi SDK not loaded. Please open this app in Pi Browser.");
+      return;
+    }
+
     try {
       const scopes = ["username", "payments"];
       const auth = await window.Pi.authenticate(scopes, onIncompletePaymentFound);
-      alert(`👋 Hi ${auth.user.username}, your wallet is connected!`);
+      setUser(auth.user);
+      alert(`Welcome ${auth.user.username}! ✅ Wallet Connected`);
+      console.log("User:", auth);
     } catch (error) {
-      console.error("Connection failed:", error);
-      alert("❌ Failed to connect wallet");
+      console.error("Authentication failed:", error);
     }
   };
 
   const onIncompletePaymentFound = (payment) => {
-    console.log("Found incomplete payment:", payment);
+    console.log("Incomplete payment found:", payment);
   };
 
   return (
-    <div style={{ textAlign: "center", paddingTop: "100px" }}>
-      <h1>💎 Click Pop Shop Pi</h1>
+    <main style={{ textAlign: "center", marginTop: "50px" }}>
+      <h1>💜 Click Pop Shop Pi</h1>
+      <p>Connect your Pi Wallet below to get started!</p>
       <button
-        onClick={connectWallet}
+        onClick={handleConnect}
         style={{
-          backgroundColor: "#7B3FE4",
-          color: "white",
-          fontSize: "18px",
+          backgroundColor: "#703D92",
+          color: "#fff",
           padding: "10px 20px",
           borderRadius: "8px",
           border: "none",
+          fontSize: "16px",
           cursor: "pointer",
         }}
       >
-        Connect Wallet
+        🔗 Connect Pi Wallet
       </button>
-    </div>
+
+      {user && (
+        <p style={{ marginTop: "20px" }}>
+          Connected as <strong>@{user.username}</strong>
+        </p>
+      )}
+    </main>
   );
 }
