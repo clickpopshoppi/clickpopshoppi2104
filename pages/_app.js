@@ -1,27 +1,23 @@
-// pages/_app.js
 import { useEffect } from "react";
 import Head from "next/head";
-import "../styles/globals.css"; // ถ้ามีไฟล์ styles (ไม่มีก็ข้ามได้)
-
-// ✅ Import Pi SDK
-import { Pi } from "@pi-network/pi-sdk";
+import "../styles/globals.css";
 
 function MyApp({ Component, pageProps }) {
   useEffect(() => {
-    // Initialize Pi SDK
-    const initPi = async () => {
-      try {
-        await Pi.init({
-          version: "2.0",
-          sandbox: false, // true = ทดสอบใน sandbox, false = production
-        });
-        console.log("✅ Pi SDK initialized successfully");
-      } catch (err) {
-        console.error("❌ Pi SDK initialization failed:", err);
+    // ✅ โหลด Pi SDK จาก CDN แทน npm
+    const script = document.createElement("script");
+    script.src = "https://sdk.minepi.com/pi-sdk.js";
+    script.async = true;
+    script.onload = () => {
+      console.log("✅ Pi SDK loaded from CDN successfully");
+      if (window.Pi) {
+        window.Pi.init({ version: "2.0", sandbox: true });
       }
     };
+    script.onerror = () => console.error("❌ Failed to load Pi SDK from CDN");
+    document.body.appendChild(script);
 
-    initPi();
+    return () => document.body.removeChild(script);
   }, []);
 
   return (
