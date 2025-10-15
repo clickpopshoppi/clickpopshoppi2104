@@ -1,28 +1,26 @@
-import { useEffect } from "react";
+// pages/_app.js
 import Head from "next/head";
 import "../styles/globals.css";
 
 function MyApp({ Component, pageProps }) {
-  useEffect(() => {
-    // โหลด Pi SDK จาก CDN ของ Pi Network
-    const script = document.createElement("script");
-    script.src = "https://sdk.minepi.com/pi-sdk.js";
-    script.async = true;
-    script.onload = () => {
-      if (window.Pi) {
-        window.Pi.init({ version: "2.0" });
-        console.log("✅ Pi SDK Loaded Successfully!");
-      } else {
-        console.error("❌ Pi SDK not found");
-      }
-    };
-    document.body.appendChild(script);
-  }, []);
-
   return (
     <>
       <Head>
-        <title>Click Pop Shop Pi</title>
+        <script
+          src="https://sdk.minepi.com/pi-sdk.js"
+          async
+        ></script>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              document.addEventListener("DOMContentLoaded", function() {
+                if (window.Pi) {
+                  window.Pi.init({ version: "2.0" });
+                }
+              });
+            `,
+          }}
+        />
       </Head>
       <Component {...pageProps} />
     </>
@@ -30,3 +28,4 @@ function MyApp({ Component, pageProps }) {
 }
 
 export default MyApp;
+   
