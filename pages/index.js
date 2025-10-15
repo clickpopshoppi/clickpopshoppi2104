@@ -1,115 +1,100 @@
+// pages/index.js
 import { useState } from "react";
 
 export default function Home() {
-  const [username, setUsername] = useState("");
-  const [balance, setBalance] = useState(null);
-  const [walletConnected, setWalletConnected] = useState(false);
+  const [amount, setAmount] = useState("");
+  const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const connectPiWallet = async () => {
-    try {
-      const scopes = ["username", "payments"];
-      const authResult = await window.Pi.authenticate(scopes, onIncompletePaymentFound);
-      setUsername(authResult.user.username || "User");
-      setWalletConnected(true);
-      console.log("Wallet connected:", authResult);
-    } catch (err) {
-      alert("Wallet connection failed: " + err.message);
-      console.error(err);
-    }
-  };
-
-  const onIncompletePaymentFound = (payment) => {
-    console.log("Incomplete payment found:", payment);
-  };
+  // ดึงกุญแจจาก Environment (ที่เราใส่ใน Vercel)
+  const API_KEY = process.env.PI_API_KEY;
 
   const handlePayment = async () => {
-    const baseAmount = 1.0; // Example amount
-    const fee = 0.01;
-    const totalAmount = baseAmount + fee;
-    const destination = "GCEUZO7JZ43VQJWF4YKPUBLHDVQVFNI7TSVG7KML3VTPOZ3VKD7LJDOM";
-
     try {
+      if (!amount) {
+        setMessage("Please enter amount first.");
+        return;
+      }
+      setLoading(true);
+      setMessage("Connecting to Pi Wallet...");
+
+      // เรียก Pi SDK จาก window (ทำงานใน Pi Browser)
       const payment = await window.Pi.createPayment(
         {
-          amount: totalAmount,
+          amount: parseFloat(amount),
           memo: "Click Pop Shop Pi Purchase",
           metadata: { orderId: Date.now().toString() },
-          to_address: destination,
+          to_address: "GCEUZO7JZ43VQJWF4YKPUBLHDVQVFNI7TSVG7KML3VTPOZ3VKD7LJDOM",
         },
         {
-          onReadyForServerApproval: (paymentId) =>
-            console.log("Ready for approval:", paymentId),
-          onReadyForServerCompletion: (paymentId, txid) =>
-            alert(`✅ Payment complete!\nTransaction ID: ${txid}`),
-          onCancel: () => alert("❌ Payment canceled."),
-          onError: (error) => alert("⚠️ Payment error: " + error.message),
+          headers: { Authorization: `Key ${API_KEY}` },
+          onReadyForServerCompletion: (paymentId, txid) => {
+            setMessage(`✅ Transaction complete! TXID: ${txid}`);
+          },
         }
       );
-      console.log("Payment:", payment);
-    } catch (error) {
-      alert("Unexpected error: " + error.message);
-      console.error(error);
+    } catch (err) {
+      console.error(err);
+      setMessage("❌ Payment failed or cancelled.");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div style={{ textAlign: "center", marginTop: "60px" }}>
-      <h1>💎 Click Pop Shop Pi</h1>
-      <p>
-        Welcome to the Pi-powered shopping experience!
-        <br />#RuamJaiRakPiNetworkThailand 💜
+    <main
+      style={{
+        fontFamily: "system-ui, sans-serif",
+        padding: "40px",
+        maxWidth: "480px",
+        margin: "0 auto",
+        textAlign: "center",
+      }}
+    >
+      <h1>💜 Click Pop Shop Pi</h1>
+      <p>Pay easily with your Pi Wallet.</p>
+      <p>Transaction fee: <b>0.01 Pi per payment</b></p>
+
+      <input
+        type="number"
+        step="0.01"
+        min="0"
+        placeholder="Enter amount"
+        value={amount}
+        onChange={(e) => setAmount(e.target.value)}
+        style={{
+          padding: "10px",
+          marginTop: "20px",
+          width: "100%",
+          fontSize: "16px",
+          borderRadius: "8px",
+          border: "1px solid #ccc",
+        }}
+      />
+
+      <button
+        onClick={handlePayment}
+        disabled={loading}
+        style={{
+          marginTop: "20px",
+          padding: "12px 24px",
+          background: "#703D92",
+          color: "#fff",
+          border: "none",
+          borderRadius: "8px",
+          cursor: "pointer",
+          fontSize: "16px",
+        }}
+      >
+        {loading ? "Processing..." : "Pay with Pi"}
+      </button>
+
+      <p style={{ marginTop: "20px", fontSize: "14px", color: "#555" }}>
+        Receiving wallet: <br />
+        <b>GCEUZO7JZ43VQJWF4YKPUBLHDVQVFNI7TSVG7KML3VTPOZ3VKD7LJDOM</b>
       </p>
 
-      {!walletConnected ? (
-        <button
-          onClick={connectPiWallet}
-          style={{
-            backgroundColor: "#7B3FE4",
-            color: "#fff",
-            border: "none",
-            padding: "12px 32px",
-            borderRadius: "8px",
-            cursor: "pointer",
-            fontSize: "18px",
-            marginTop: "20px",
-          }}
-        >
-          🔗 Connect Pi Wallet
-        </button>
-      ) : (
-        <>
-          <h3>💰 Wallet Connected</h3>
-          <p>
-            Username: <strong>{username}</strong>
-          </p>
-          <p>
-            Balance: <strong>{balance ? `${balance} Pi` : "81.40 Pi"}</strong>
-          </p>
-          <button
-            onClick={handlePayment}
-            style={{
-              backgroundColor: "#9C4DF4",
-              color: "white",
-              padding: "12px 30px",
-              border: "none",
-              borderRadius: "8px",
-              fontSize: "18px",
-              cursor: "pointer",
-              marginTop: "10px",
-            }}
-          >
-            Pay with Pi ⚡
-          </button>
-          <p style={{ fontSize: "14px", color: "#555", marginTop: "10px" }}>
-            ⚠️ Transaction fee: 0.01 Pi per payment (paid by sender).
-            <br />
-            🏦 Receiver wallet:{" "}
-            <strong>
-              GCEUZO7JZ43VQJWF4YKPUBLHDVQVFNI7TSVG7KML3VTPOZ3VKD7LJDOM
-            </strong>
-          </p>
-        </>
-      )}
-    </div>
+      <p style={{ marginTop: "20px", color: "green" }}>{message}</p>
+    </main>
   );
-}
+} 
