@@ -3,10 +3,9 @@ import { useEffect, useState } from "react";
 export default function Home() {
   const [pi, setPi] = useState(null);
   const [username, setUsername] = useState("");
-  const [balance, setBalance] = useState(81.40); // demo balance
+  const [balance, setBalance] = useState(81.40);
   const [connected, setConnected] = useState(false);
 
-  // ✅ โหลด Pi SDK อัตโนมัติ
   useEffect(() => {
     const script = document.createElement("script");
     script.src = "https://sdk.minepi.com/pi-sdk.js";
@@ -16,72 +15,56 @@ export default function Home() {
         window.Pi.init({ version: "2.0" });
         setPi(window.Pi);
         console.log("✅ Pi SDK loaded");
-      } else {
-        console.log("⚠️ Pi SDK not found");
       }
     };
     document.body.appendChild(script);
   }, []);
 
-  // ✅ เชื่อมต่อกระเป๋า
   const handleConnect = async () => {
-    if (!pi) {
-      alert("Pi SDK not ready yet. Please refresh inside Pi Browser.");
-      return;
-    }
+    if (!pi) return alert("Pi SDK not ready. Open inside Pi Browser.");
     try {
       const scopes = ["username", "payments"];
-      const authResult = await pi.authenticate(scopes, onIncompletePaymentFound);
-      console.log("✅ Auth Result:", authResult);
-      setUsername(authResult.user.username);
+      const auth = await pi.authenticate(scopes, (p) => console.log(p));
+      setUsername(auth.user.username);
       setConnected(true);
-      alert(`Wallet connected: ${authResult.user.username}`);
-    } catch (e) {
-      console.error(e);
-    }
-  };
-
-  // ✅ ฟังก์ชันชำระเงิน
-  const handlePayment = async () => {
-    if (!pi) {
-      alert("Pi SDK not loaded yet.");
-      return;
-    }
-    try {
-      const payment = await pi.createPayment({
-        amount: 1, // 💡 เปลี่ยนจำนวน Pi ที่ต้องการทดสอบ
-        memo: "Test payment from Click Pop Shop Pi",
-        metadata: { orderId: "1234" },
-        to_address: "GCEUZO7JZ43VQJWF4YKPUBLHDVQVFNI7TSVG7KML3VTPOZ3VKD7LJDOM",
-      },
-      {
-        onReadyForServerApproval: (paymentId) => {
-          console.log("Ready for server approval:", paymentId);
-        },
-        onReadyForServerCompletion: (paymentId, txid) => {
-          console.log("Ready for completion:", paymentId, txid);
-        },
-        onCancel: (paymentId) => {
-          console.log("Payment cancelled:", paymentId);
-        },
-        onError: (error, paymentId) => {
-          console.error("Payment error:", error, paymentId);
-        }
-      });
-      console.log("✅ Payment initiated:", payment);
+      alert(`Wallet connected: ${auth.user.username}`);
     } catch (err) {
-      console.error("❌ Payment failed:", err);
+      console.error("Auth error:", err);
     }
   };
 
-  const onIncompletePaymentFound = (payment) => {
-    console.log("Found incomplete payment:", payment);
+  const handlePayment = async () => {
+    if (!pi) return alert("Pi SDK not ready.");
+    try {
+      const paymentData = {
+        amount: 0.01, // test transaction
+        memo: "Test payment from Click Pop Shop Pi",
+        metadata: { orderId: "test001" },
+        to_address: "GCEUZO7JZ43VQJWF4YKPUBLHDVQVFNI7TSVG7KML3VTPOZ3VKD7LJDOM",
+      };
+
+      const callbacks = {
+        onReadyForServerApproval: (paymentId) =>
+          console.log("Approve:", paymentId),
+        onReadyForServerCompletion: (paymentId, txid) =>
+          console.log("Complete:", paymentId, txid),
+        onCancel: (paymentId) => console.log("Cancelled:", paymentId),
+        onError: (err) => console.error("Payment error:", err),
+      };
+
+      await pi.createPayment(paymentData, callbacks);
+    } catch (err) {
+      console.error("Payment failed:", err);
+    }
   };
 
   return (
     <div style={{ textAlign: "center", padding: "50px" }}>
       <h1>💎 Click Pop Shop Pi</h1>
-      <p>Welcome to the Pi-powered shopping experience!<br/>#RuamJaiRakPiNetworkThailand 💜</p>
+      <p>
+        Welcome to the Pi-powered shopping experience!<br />
+        #RuamJaiRakPiNetworkThailand 💜
+      </p>
 
       {!connected ? (
         <button
@@ -120,3 +103,4 @@ export default function Home() {
     </div>
   );
 }
+ 
