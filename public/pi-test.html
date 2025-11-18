@@ -1,93 +1,99 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Click Pop Shop Pi - Test Token</title>
+    <title>Click Pop Shop Pi Test Token</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="https://sdk.mine.pi/pi-sdk-client.min.js"></script>
     <style>
-        body {
-            font-family: sans-serif;
-            text-align: center;
-            padding: 20px;
-            background-color: #f0f0f0;
-        }
-        .container {
-            max-width: 400px;
-            margin: 0 auto;
-            background-color: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-        }
-        h1 {
-            color: #333;
-        }
-        p {
-            color: #666;
-            margin-bottom: 20px;
-        }
-        .pi-button {
-            background-color: #ff9800; /* Pi Orange */
+        body { text-align: center; font-family: Arial, sans-serif; padding-top: 50px; }
+        .success { color: green; font-size: 20px; }
+        .error { color: red; font-size: 20px; }
+        .button {
+            background-color: #9200ff;
             color: white;
-            border: none;
-            padding: 10px 20px;
+            padding: 15px 32px;
             text-align: center;
             text-decoration: none;
             display: inline-block;
             font-size: 16px;
             margin: 4px 2px;
             cursor: pointer;
+            border: none;
             border-radius: 8px;
-            width: 100%;
-        }
-        .status {
-            margin-top: 20px;
-            font-weight: bold;
-            color: green;
         }
     </style>
+    <script src="https://sdk.minepi.com/v2/pi-sdk.js"></script>
 </head>
 <body>
-    <div class="container">
-        <h1>Click Pop Shop Pi</h1>
-        <p>V0.5.4 Testnet</p>
-        <button class="pi-button" onclick="startPiAuthentication()">
-            Click to Connect Pi Wallet Required for Test Token
-        </button>
-        <div id="status" class="status"></div>
-    </div>
+    <h1>Click Pop Shop Pi</h1>
+    <p>Welcome to the Pi-powered shopping experience!</p>
+
+    <div id="status">Ready for Pi Wallet Connection.</div>
+    <br>
+    <button id="connectButton" class="button">Connect Pi Wallet</button>
+    <button id="payButton" class="button" style="display: none;">Pay with Pi (0.01 Fee)</button>
 
     <script>
-        // API Key ของ Click Pop Shop Pi ถูกใส่ลงในบรรทัดนี้แล้ว
-        Pi.init({ version: "2.0", api_key: "Zlcr6r8df6ulp89cseo7p5wwe1xnh4xduzpntzwgn6lz1qmuglfrjrkuhotte1hp" });
+        const statusDiv = document.getElementById('status');
+        const connectButton = document.getElementById('connectButton');
+        const payButton = document.getElementById('payButton');
+        let authData = null;
 
-        // Function to start authentication
-        function startPiAuthentication() {
-            document.getElementById('status').innerText = "Authenticating...";
+        // 1. Initialize Pi SDK with Correct App ID
+        Pi.init({
+            apiKey: "E121e1757cffc8778670efc6ea56b98e5e0736734f6a62ac4bcd2406867f1644e11232505cf5679699538c4092c92039b62b5226a1a2d8a06209221330271ed1"
+        });
 
-            // Request user identity from Pi
-            Pi.authenticate(['username'], onIncompletePaymentFound)
-                .then(function(auth) {
-                    // Success! Display username and hide button
-                    document.getElementById('status').innerText = "Success! Welcome, " + auth.user.username + ". You are ready for Test Token.";
-                    document.querySelector('.pi-button').style.display = 'none';
+        // Event Listeners
+        connectButton.addEventListener('click', piAuthenticate);
+        payButton.addEventListener('click', piCreatePayment);
 
-                    // Log the success (Optional for debugging)
-                    console.log("Pi Authentication Success:", auth);
-                })
-                .catch(function(error) {
-                    // Error occurred
-                    document.getElementById('status').innerText = "Authentication Failed. Please try again. Error: " + error.message;
-
-                    // Log the error (Optional for debugging)
-                    console.error("Pi Authentication Failed:", error);
-                });
+        function piAuthenticate() {
+            statusDiv.innerHTML = 'Connecting...';
+            Pi.authenticate(['username', 'payments'], onAuth);
         }
 
-        // Placeholder for onIncompletePaymentFound function (Required by Pi SDK)
-        function onIncompletePaymentFound(payment) {
-            // This function is required by the SDK but can be empty for now
-            console.log("Incomplete Payment Found (Placeholder):", payment);
+        function onAuth(data) {
+            authData = data;
+            if (authData && authData.user) {
+                statusDiv.innerHTML = `<span class="success">Wallet Connected! Username: ${authData.user.username}</span>`;
+                connectButton.style.display = 'none';
+                payButton.style.display = 'inline-block';
+            } else {
+                statusDiv.innerHTML = '<span class="error">Wallet Connection Failed.</span>';
+            }
+        }
+
+        function piCreatePayment() {
+            statusDiv.innerHTML = 'Preparing Test Payment...';
+
+            const paymentData = {
+                amount: 0.01,
+                memo: 'Test Token for Click Pop Shop Pi',
+                metadata: {
+                    orderId: 'TEST_TOKEN_PAYMENT_123'
+                }
+            };
+
+            const callbacks = {
+                onReadyForServerApproval: function(paymentId) {
+                    // In a real app, this would send paymentId to your server for approval
+                    statusDiv.innerHTML = `<span class="success">Payment ID ${paymentId} Ready. Please Confirm in Wallet.</span>`;
+                    // For Test Token, Pi automatically approves it, so just wait for completion
+                },
+                onReadyForServerCompletion: function(paymentId, txid) {
+                    // In a real app, this confirms payment with your server
+                    statusDiv.innerHTML = `<span class="success">TEST TOKEN PASSED! Payment Completed (TXID: ${txid})</span>`;
+                    payButton.style.display = 'none';
+                },
+                onCancel: function(paymentId) {
+                    statusDiv.innerHTML = '<span class="error">Payment Cancelled.</span>';
+                },
+                onError: function(error, payment) {
+                    statusDiv.innerHTML = `<span class="error">Payment Failed: ${error}</span>`;
+                }
+            };
+
+            Pi.inappPayments.createPayment(paymentData, callbacks);
         }
     </script>
 </body>
